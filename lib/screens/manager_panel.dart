@@ -68,30 +68,135 @@ class _ManagerPanelState extends State<ManagerPanel> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  decoration: const InputDecoration(labelText: 'Employee Name'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  cursorColor: Theme.of(context).colorScheme.primary,
+                  decoration: InputDecoration(
+                    labelText: 'Employee Name',
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
                   onChanged: (value) {
-                    _filterName = value.isEmpty ? null : value;
+                    setState(() {
+                      _filterName = value.isEmpty ? null : value;
+                    });
                   },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  decoration: const InputDecoration(labelText: 'Project'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  cursorColor: Theme.of(context).colorScheme.primary,
+                  decoration: InputDecoration(
+                    labelText: 'Project',
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    prefixIcon: Icon(Icons.folder_outlined, color: Theme.of(context).colorScheme.primary),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
                   onChanged: (value) {
-                    _filterProject = value.isEmpty ? null : value;
+                    setState(() {
+                      _filterProject = value.isEmpty ? null : value;
+                    });
                   },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Status'),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('Any')),
-                    DropdownMenuItem(value: 'ongoing', child: Text('Ongoing')),
-                    DropdownMenuItem(value: 'blocked', child: Text('Blocked')),
-                    DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    prefixIcon: Icon(Icons.flag_outlined, color: Theme.of(context).colorScheme.primary),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                  icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.primary),
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  items: [
+                    DropdownMenuItem(
+                      value: null, 
+                      child: Text('All Statuses', 
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'ongoing',
+                      child: Row(
+                        children: [
+                          Icon(Icons.trending_up, color: Colors.blue, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Ongoing', 
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                          ),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'blocked',
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Blocked', 
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                          ),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'completed',
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Completed', 
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                   onChanged: (value) {
                     _filterStatus = value;

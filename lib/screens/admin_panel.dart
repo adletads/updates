@@ -151,12 +151,54 @@ class _AdminPanelState extends State<AdminPanel> {
           children: [
             DropdownButtonFormField<String>(
               value: selectedRole,
-              decoration: const InputDecoration(labelText: 'Role'),
-              items: const [
-                DropdownMenuItem(value: 'employee', child: Text('Employee')),
-                DropdownMenuItem(value: 'manager', child: Text('Manager')),
-                DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                DropdownMenuItem(value: 'hr', child: Text('HR')),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              decoration: InputDecoration(
+                labelText: 'Role',
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                ),
+                prefixIcon: Icon(Icons.badge_outlined, color: Theme.of(context).colorScheme.primary),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.primary),
+              dropdownColor: Theme.of(context).colorScheme.surface,
+              items: [
+                DropdownMenuItem(
+                  value: 'employee', 
+                  child: Text('Employee', 
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                  )
+                ),
+                DropdownMenuItem(
+                  value: 'manager', 
+                  child: Text('Manager', 
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                  )
+                ),
+                DropdownMenuItem(
+                  value: 'admin', 
+                  child: Text('Admin', 
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                  )
+                ),
+                DropdownMenuItem(
+                  value: 'hr', 
+                  child: Text('HR', 
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                  )
+                ),
               ],
               onChanged: (value) {
                 if (value != null) selectedRole = value;
@@ -228,46 +270,96 @@ class _AdminPanelState extends State<AdminPanel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Add department section
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _newDeptController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Add Department',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
+                              Text(
+                                'Departments',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _newDeptController,
+                                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                      cursorColor: Theme.of(context).colorScheme.primary,
+                                      decoration: InputDecoration(
+                                        labelText: 'Department Name',
+                                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                        filled: true,
+                                        fillColor: Theme.of(context).colorScheme.surface,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                        ),
+                                        prefixIcon: Icon(Icons.business, color: Theme.of(context).colorScheme.primary),
+                                        hintText: 'Enter department name',
+                                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: _addDepartment,
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                  const SizedBox(width: 12),
+                                  ElevatedButton.icon(
+                                    onPressed: _addDepartment,
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('Add'),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                                ),
-                                child: const Text('Add'),
+                                ],
                               ),
+                              if (_departments.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Current Departments',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: _departments.map((d) => Chip(
+                                    label: Text(d),
+                                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                    side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
+                                  )).toList(),
+                                ),
+                              ],
                             ],
                           ),
                         ),
-                        if (_departments.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Wrap(
-                              spacing: 8,
-                              children: _departments.map((d) => Chip(label: Text(d))).toList(),
-                            ),
-                          ),
                         Expanded(
                           child: AnimatedList(
                             key: ValueKey('userList'),
@@ -334,48 +426,123 @@ class _AdminPanelState extends State<AdminPanel> {
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _contentController,
-                              decoration: InputDecoration(
-                                labelText: 'Update Content',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              cursorColor: Theme.of(context).colorScheme.primary,
                               maxLines: 5,
                               validator: (value) => value == null || value.isEmpty ? 'Please enter update content' : null,
+                              decoration: InputDecoration(
+                                labelText: 'Update Content',
+                                labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.surface,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              ),
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _projectController,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              cursorColor: Theme.of(context).colorScheme.primary,
                               decoration: InputDecoration(
                                 labelText: 'Project Name',
+                                labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: Theme.of(context).colorScheme.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                 ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                ),
+                                prefixIcon: Icon(Icons.folder_outlined, color: Theme.of(context).colorScheme.primary),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               ),
                               validator: (value) => value == null || value.isEmpty ? 'Please enter project name' : null,
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
                               value: _status,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                               decoration: InputDecoration(
                                 labelText: 'Status',
+                                labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: Theme.of(context).colorScheme.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                 ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                ),
+                                prefixIcon: Icon(Icons.flag_outlined, color: Theme.of(context).colorScheme.primary),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               ),
-                              items: const [
-                                DropdownMenuItem(value: 'ongoing', child: Text('Ongoing')),
-                                DropdownMenuItem(value: 'blocked', child: Text('Blocked')),
-                                DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                              icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.primary),
+                              dropdownColor: Theme.of(context).colorScheme.surface,
+                              items: <DropdownMenuItem<String>>[
+                                DropdownMenuItem<String>(
+                                  value: 'ongoing',
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.trending_up, color: Colors.blue, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text('Ongoing',
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'blocked',
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.error_outline, color: Colors.red, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text('Blocked',
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'completed',
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text('Completed',
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                               onChanged: (value) {
                                 if (value != null) {
@@ -388,14 +555,26 @@ class _AdminPanelState extends State<AdminPanel> {
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _remarkController,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              cursorColor: Theme.of(context).colorScheme.primary,
                               decoration: InputDecoration(
                                 labelText: 'Remark (optional)',
+                                labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: Theme.of(context).colorScheme.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                 ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               ),
                               maxLines: 2,
                             ),
