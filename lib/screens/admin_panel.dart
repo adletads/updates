@@ -204,6 +204,13 @@ class _AdminPanelState extends State<AdminPanel> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Admin Panel'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () => FirebaseAuth.instance.signOut(),
+            ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Users'),
@@ -470,3 +477,4 @@ class _AdminPanelState extends State<AdminPanel> {
       ),
     );
   }
+}
