@@ -48,6 +48,11 @@ class _ManagerPanelState extends State<ManagerPanel> {
     _loadUpdates();
   }
 
+  Future<void> _approveUpdate(DocumentSnapshot updateDoc) async {
+    await _updateService.updateUpdate(updateDoc.id, {'approved': true});
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update approved')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,8 +115,19 @@ class _ManagerPanelState extends State<ManagerPanel> {
                       final update = _updates[index].data() as Map<String, dynamic>;
                       return ListTile(
                         title: Text(update['content'] ?? ''),
-                        subtitle: Text('By ${update['name'] ?? ''} on ${update['date'] ?? ''}'),
-                        trailing: Text(update['status'] ?? ''),
+                        subtitle: Text('By ${update['name'] ?? ''} on ${update['date'] ?? ''}\nProject: ${update['project'] ?? ''}${(update['remark'] != null && update['remark'].toString().isNotEmpty) ? '\nRemark: ${update['remark']}' : ''}\nApproved: ${update['approved'] == true ? 'Yes' : 'No'}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(update['status'] ?? ''),
+                            if (update['approved'] != true)
+                              IconButton(
+                                icon: const Icon(Icons.check_circle, color: Colors.green),
+                                tooltip: 'Approve Update',
+                                onPressed: () => _approveUpdate(_updates[index]),
+                              ),
+                          ],
+                        ),
                         onTap: () {
                           // TODO: Show update details and allow commenting/feedback
                         },

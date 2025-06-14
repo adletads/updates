@@ -8,6 +8,7 @@ import 'providers/user_provider.dart';
 import 'screens/employee_panel.dart';
 import 'screens/manager_panel.dart';
 import 'screens/admin_panel.dart';
+import 'screens/hr_panel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -269,7 +270,16 @@ class HomeScreen extends StatelessWidget {
                         },
                         child: const Text('Go to Admin Panel'),
                       )
-                    : const Text('Welcome! You are logged in.'),
+                    : userProvider.role == 'hr'
+                        ? ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const HRPanel()),
+                              );
+                            },
+                            child: const Text('Go to HR Panel'),
+                          )
+                        : const Text('Welcome! You are logged in.'),
       ),
     );
   }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../services/firestore_service.dart';
+import '../providers/user_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({Key? key}) : super(key: key);
@@ -13,8 +16,18 @@ class _AdminPanelState extends State<AdminPanel> {
   final UserService _userService = UserService();
   final UpdateService _updateService = UpdateService();
 
+  // Update form controllers for admin
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _projectController = TextEditingController();
+  final TextEditingController _remarkController = TextEditingController();
+  final TextEditingController _newDeptController = TextEditingController();
+  String _status = 'ongoing';
+  bool _submitting = false;
+
   List<QueryDocumentSnapshot> _users = [];
   List<QueryDocumentSnapshot> _updates = [];
+  List<String> _departments = [];
   bool _loadingUsers = true;
   bool _loadingUpdates = true;
 
@@ -23,6 +36,7 @@ class _AdminPanelState extends State<AdminPanel> {
     super.initState();
     _loadUsers();
     _loadUpdates();
+    _loadDepartments();
   }
 
   void _loadUsers() {
@@ -43,8 +57,144 @@ class _AdminPanelState extends State<AdminPanel> {
     });
   }
 
+  void _loadDepartments() {
+    FirebaseFirestore.instance.collection('departments').snapshots().listen((snapshot) {
+      setState(() {
+        _departments = snapshot.docs.map((doc) => doc['name'] as String).toList();
+      });
+    });
+  }
+
   void _assignManagerRole(String uid) {
     _userService.setUser(uid, {'role': 'manager'});
+  }
+
+  Future<void> _editRemarkDialog(DocumentSnapshot updateDoc) async {
+    final update = updateDoc.data() as Map<String, dynamic>;
+    final TextEditingController _editRemarkController = TextEditingController(text: update['remark'] ?? '');
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Remark'),
+        content: TextFormField(
+          controller: _editRemarkController,
+          maxLines: 3,
+          decoration: const InputDecoration(labelText: 'Remark'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, _editRemarkController.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      await _updateService.updateUpdate(updateDoc.id, {'remark': result});
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Remark updated')));
+    }
+  }
+
+  Future<void> _submitAdminUpdate() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _submitting = true; });
+    final now = DateTime.now();
+    final dateStr = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final uid = userProvider.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+      final name = userProvider.name ?? FirebaseAuth.instance.currentUser?.email ?? 'Admin';
+      final data = {
+        'date': dateStr,
+        'content': _contentController.text.trim(),
+        'project': _projectController.text.trim(),
+        'status': _status,
+        'remark': _remarkController.text.trim(),
+      };
+      await _updateService.addUpdate(data, uid, name);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update submitted')));
+      _contentController.clear();
+      _projectController.clear();
+      _remarkController.clear();
+      setState(() { _status = 'ongoing'; });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error submitting update: $e')));
+    } finally {
+      setState(() { _submitting = false; });
+    }
+  }
+
+  Future<void> _approveUpdate(DocumentSnapshot updateDoc) async {
+    await _updateService.updateUpdate(updateDoc.id, {'approved': true});
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update approved')));
+  }
+
+  Future<void> _addDepartment() async {
+    final name = _newDeptController.text.trim();
+    if (name.isEmpty) return;
+    await FirebaseFirestore.instance.collection('departments').add({'name': name});
+    _newDeptController.clear();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Department added')));
+  }
+
+  Future<void> _assignRoleAndDepartmentDialog(DocumentSnapshot userDoc) async {
+    final user = userDoc.data() as Map<String, dynamic>;
+    String selectedRole = user['role'] ?? 'employee';
+    String selectedDept = user['department'] ?? (_departments.isNotEmpty ? _departments.first : '');
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Assign Role & Department'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              value: selectedRole,
+              decoration: const InputDecoration(labelText: 'Role'),
+              items: const [
+                DropdownMenuItem(value: 'employee', child: Text('Employee')),
+                DropdownMenuItem(value: 'manager', child: Text('Manager')),
+                DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                DropdownMenuItem(value: 'hr', child: Text('HR')),
+              ],
+              onChanged: (value) {
+                if (value != null) selectedRole = value;
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: selectedDept.isNotEmpty ? selectedDept : null,
+              decoration: const InputDecoration(labelText: 'Department'),
+              items: _departments.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+              onChanged: (value) {
+                if (value != null) selectedDept = value;
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, {'role': selectedRole, 'department': selectedDept}),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      await _userService.setUser(userDoc.id, {'role': result['role'], 'department': result['department']});
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Role and department updated')));
+    }
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    _projectController.dispose();
+    _remarkController.dispose();
+    _newDeptController.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,34 +215,163 @@ class _AdminPanelState extends State<AdminPanel> {
           children: [
             _loadingUsers
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: _users.length,
-                    itemBuilder: (context, index) {
-                      final user = _users[index].data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(user['name'] ?? ''),
-                        subtitle: Text('Role: ${user['role'] ?? 'N/A'} - Dept: ${user['department'] ?? 'N/A'}'),
-                        trailing: user['role'] == 'manager'
-                            ? const Text('Manager')
-                            : ElevatedButton(
-                                onPressed: () => _assignManagerRole(_users[index].id),
-                                child: const Text('Assign Manager'),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Add department section
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _newDeptController,
+                                decoration: const InputDecoration(labelText: 'Add Department'),
                               ),
-                      );
-                    },
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: _addDepartment,
+                              child: const Text('Add'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_departments.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Wrap(
+                            spacing: 8,
+                            children: _departments.map((d) => Chip(label: Text(d))).toList(),
+                          ),
+                        ),
+                      // ...existing user list...
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _users.length,
+                          itemBuilder: (context, index) {
+                            final userDoc = _users[index];
+                            final user = userDoc.data() as Map<String, dynamic>;
+                            return ListTile(
+                              title: Text(user['name'] ?? ''),
+                              subtitle: Text('Role: ${user['role'] ?? 'N/A'} - Dept: ${user['department'] ?? 'N/A'}'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  user['role'] == 'manager'
+                                      ? const Text('Manager')
+                                      : ElevatedButton(
+                                          onPressed: () => _assignManagerRole(userDoc.id),
+                                          child: const Text('Assign Manager'),
+                                        ),
+                                  IconButton(
+                                    icon: const Icon(Icons.admin_panel_settings),
+                                    tooltip: 'Assign Role & Department',
+                                    onPressed: () => _assignRoleAndDepartmentDialog(userDoc),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
+            // Updates tab with admin update form
             _loadingUpdates
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: _updates.length,
-                    itemBuilder: (context, index) {
-                      final update = _updates[index].data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(update['content'] ?? ''),
-                        subtitle: Text('By ${update['name'] ?? ''} on ${update['date'] ?? ''}'),
-                        trailing: Text(update['status'] ?? ''),
-                      );
-                    },
+                : ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // Admin update form
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Submit Update', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _contentController,
+                              decoration: const InputDecoration(labelText: 'Update Content'),
+                              maxLines: 5,
+                              validator: (value) => value == null || value.isEmpty ? 'Please enter update content' : null,
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _projectController,
+                              decoration: const InputDecoration(labelText: 'Project Name'),
+                              validator: (value) => value == null || value.isEmpty ? 'Please enter project name' : null,
+                            ),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<String>(
+                              value: _status,
+                              decoration: const InputDecoration(labelText: 'Status'),
+                              items: const [
+                                DropdownMenuItem(value: 'ongoing', child: Text('Ongoing')),
+                                DropdownMenuItem(value: 'blocked', child: Text('Blocked')),
+                                DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() { _status = value; });
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _remarkController,
+                              decoration: const InputDecoration(labelText: 'Remark (optional)'),
+                              maxLines: 2,
+                            ),
+                            const SizedBox(height: 12),
+                            _submitting
+                                ? const Center(child: CircularProgressIndicator())
+                                : ElevatedButton(
+                                    onPressed: _submitAdminUpdate,
+                                    child: const Text('Submit Update'),
+                                  ),
+                            const Divider(height: 32),
+                          ],
+                        ),
+                      ),
+                      const Text('All Updates', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      _updates.isEmpty
+                          ? const Text('No updates found.')
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _updates.length,
+                              itemBuilder: (context, index) {
+                                final updateDoc = _updates[index];
+                                final update = updateDoc.data() as Map<String, dynamic>;
+                                return Card(
+                                  child: ListTile(
+                                    title: Text(update['content'] ?? ''),
+                                    subtitle: Text('By ${update['name'] ?? ''} on ${update['date'] ?? ''}\nProject: ${update['project'] ?? ''}${(update['remark'] != null && update['remark'].toString().isNotEmpty) ? '\nRemark: ${update['remark']}' : ''}\nApproved: ${update['approved'] == true ? 'Yes' : 'No'}'),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(update['status'] ?? ''),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          tooltip: 'Edit Remark',
+                                          onPressed: () => _editRemarkDialog(updateDoc),
+                                        ),
+                                        if (update['approved'] != true)
+                                          IconButton(
+                                            icon: const Icon(Icons.check_circle, color: Colors.green),
+                                            tooltip: 'Approve Update',
+                                            onPressed: () => _approveUpdate(updateDoc),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ],
                   ),
           ],
         ),
