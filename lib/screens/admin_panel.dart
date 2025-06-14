@@ -215,98 +215,156 @@ class _AdminPanelState extends State<AdminPanel> {
           children: [
             _loadingUsers
                 ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Add department section
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _newDeptController,
-                                decoration: const InputDecoration(labelText: 'Add Department'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: _addDepartment,
-                              child: const Text('Add'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_departments.isNotEmpty)
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Add department section
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Wrap(
-                            spacing: 8,
-                            children: _departments.map((d) => Chip(label: Text(d))).toList(),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _newDeptController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Add Department',
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: _addDepartment,
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                                ),
+                                child: const Text('Add'),
+                              ),
+                            ],
                           ),
                         ),
-                      // ...existing user list...
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _users.length,
-                          itemBuilder: (context, index) {
-                            final userDoc = _users[index];
-                            final user = userDoc.data() as Map<String, dynamic>;
-                            return ListTile(
-                              title: Text(user['name'] ?? ''),
-                              subtitle: Text('Role: ${user['role'] ?? 'N/A'} - Dept: ${user['department'] ?? 'N/A'}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  user['role'] == 'manager'
-                                      ? const Text('Manager')
-                                      : ElevatedButton(
-                                          onPressed: () => _assignManagerRole(userDoc.id),
-                                          child: const Text('Assign Manager'),
-                                        ),
-                                  IconButton(
-                                    icon: const Icon(Icons.admin_panel_settings),
-                                    tooltip: 'Assign Role & Department',
-                                    onPressed: () => _assignRoleAndDepartmentDialog(userDoc),
+                        if (_departments.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Wrap(
+                              spacing: 8,
+                              children: _departments.map((d) => Chip(label: Text(d))).toList(),
+                            ),
+                          ),
+                        Expanded(
+                          child: AnimatedList(
+                            key: ValueKey('userList'),
+                            initialItemCount: _users.length,
+                            itemBuilder: (context, index, animation) {
+                              final userDoc = _users[index];
+                              final user = userDoc.data() as Map<String, dynamic>;
+                              return SizeTransition(
+                                sizeFactor: animation,
+                                child: Card(
+                                  elevation: 6,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                ],
-                              ),
-                            );
-                          },
+                                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                                  child: ListTile(
+                                    title: Text(user['name'] ?? ''),
+                                    subtitle: Text('Role: ${user['role'] ?? 'N/A'} - Dept: ${user['department'] ?? 'N/A'}'),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        user['role'] == 'manager'
+                                            ? const Text('Manager')
+                                            : ElevatedButton(
+                                                onPressed: () => _assignManagerRole(userDoc.id),
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                                ),
+                                                child: const Text('Assign Manager'),
+                                              ),
+                                        IconButton(
+                                          icon: const Icon(Icons.admin_panel_settings),
+                                          tooltip: 'Assign Role & Department',
+                                          onPressed: () => _assignRoleAndDepartmentDialog(userDoc),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-            // Updates tab with admin update form
             _loadingUpdates
                 ? const Center(child: CircularProgressIndicator())
                 : ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      // Admin update form
                       Form(
                         key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Submit Update', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            const Text(
+                              'Submit Update',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _contentController,
-                              decoration: const InputDecoration(labelText: 'Update Content'),
+                              decoration: InputDecoration(
+                                labelText: 'Update Content',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                               maxLines: 5,
                               validator: (value) => value == null || value.isEmpty ? 'Please enter update content' : null,
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _projectController,
-                              decoration: const InputDecoration(labelText: 'Project Name'),
+                              decoration: InputDecoration(
+                                labelText: 'Project Name',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                               validator: (value) => value == null || value.isEmpty ? 'Please enter project name' : null,
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
                               value: _status,
-                              decoration: const InputDecoration(labelText: 'Status'),
+                              decoration: InputDecoration(
+                                labelText: 'Status',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                               items: const [
                                 DropdownMenuItem(value: 'ongoing', child: Text('Ongoing')),
                                 DropdownMenuItem(value: 'blocked', child: Text('Blocked')),
@@ -314,58 +372,92 @@ class _AdminPanelState extends State<AdminPanel> {
                               ],
                               onChanged: (value) {
                                 if (value != null) {
-                                  setState(() { _status = value; });
+                                  setState(() {
+                                    _status = value;
+                                  });
                                 }
                               },
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _remarkController,
-                              decoration: const InputDecoration(labelText: 'Remark (optional)'),
+                              decoration: InputDecoration(
+                                labelText: 'Remark (optional)',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                               maxLines: 2,
                             ),
                             const SizedBox(height: 12),
                             _submitting
                                 ? const Center(child: CircularProgressIndicator())
-                                : ElevatedButton(
-                                    onPressed: _submitAdminUpdate,
-                                    child: const Text('Submit Update'),
+                                : AnimatedScale(
+                                    scale: _submitting ? 0.95 : 1.0,
+                                    duration: const Duration(milliseconds: 200),
+                                    child: ElevatedButton(
+                                      onPressed: _submitAdminUpdate,
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                                      ),
+                                      child: const Text('Submit Update'),
+                                    ),
                                   ),
                             const Divider(height: 32),
                           ],
                         ),
                       ),
-                      const Text('All Updates', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'All Updates',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 8),
                       _updates.isEmpty
                           ? const Text('No updates found.')
-                          : ListView.builder(
+                          : AnimatedList(
+                              key: ValueKey('updateList'),
+                              initialItemCount: _updates.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _updates.length,
-                              itemBuilder: (context, index) {
+                              itemBuilder: (context, index, animation) {
                                 final updateDoc = _updates[index];
                                 final update = updateDoc.data() as Map<String, dynamic>;
-                                return Card(
-                                  child: ListTile(
-                                    title: Text(update['content'] ?? ''),
-                                    subtitle: Text('By ${update['name'] ?? ''} on ${update['date'] ?? ''}\nProject: ${update['project'] ?? ''}${(update['remark'] != null && update['remark'].toString().isNotEmpty) ? '\nRemark: ${update['remark']}' : ''}\nApproved: ${update['approved'] == true ? 'Yes' : 'No'}'),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(update['status'] ?? ''),
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          tooltip: 'Edit Remark',
-                                          onPressed: () => _editRemarkDialog(updateDoc),
-                                        ),
-                                        if (update['approved'] != true)
+                                return SizeTransition(
+                                  sizeFactor: animation,
+                                  child: Card(
+                                    elevation: 6,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                                    child: ListTile(
+                                      title: Text(update['content'] ?? ''),
+                                      subtitle: Text(
+                                        'By ${update['name'] ?? ''} on ${update['date'] ?? ''}\nProject: ${update['project'] ?? ''}${(update['remark'] != null && update['remark'].toString().isNotEmpty) ? '\nRemark: ${update['remark']}' : ''}\nApproved: ${update['approved'] == true ? 'Yes' : 'No'}',
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(update['status'] ?? ''),
                                           IconButton(
-                                            icon: const Icon(Icons.check_circle, color: Colors.green),
-                                            tooltip: 'Approve Update',
-                                            onPressed: () => _approveUpdate(updateDoc),
+                                            icon: const Icon(Icons.edit),
+                                            tooltip: 'Edit Remark',
+                                            onPressed: () => _editRemarkDialog(updateDoc),
                                           ),
-                                      ],
+                                          if (update['approved'] != true)
+                                            IconButton(
+                                              icon: const Icon(Icons.check_circle, color: Colors.green),
+                                              tooltip: 'Approve Update',
+                                              onPressed: () => _approveUpdate(updateDoc),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -378,4 +470,3 @@ class _AdminPanelState extends State<AdminPanel> {
       ),
     );
   }
-}
