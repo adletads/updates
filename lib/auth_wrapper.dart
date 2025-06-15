@@ -146,67 +146,80 @@ class _AuthWrapperState extends State<AuthWrapper> with SingleTickerProviderStat
                                   ),
                             ),
                             const SizedBox(height: 48),
-                            Card(
-                              elevation: 8,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  children: [
-                                    TextField(
-                                      controller: _emailController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Email',
-                                        prefixIcon: Icon(Icons.email),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                double maxWidth = constraints.maxWidth;
+                                double cardWidth = (maxWidth * 0.9).clamp(300.0, 500.0);
+
+                                return Center(
+                                  child: SizedBox(
+                                    width: cardWidth,
+                                    child: Card(
+                                      elevation: 8,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
-                                      keyboardType: TextInputType.emailAddress,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    TextField(
-                                      controller: _passwordController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Password',
-                                        prefixIcon: Icon(Icons.lock),
-                                      ),
-                                      obscureText: true,
-                                    ),
-                                    if (_errorMessage != null) ...[
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        _errorMessage!,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.error,
-                                        ),
-                                      ),
-                                    ],
-                                    const SizedBox(height: 24),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: _isLoading ? null : _signIn,
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(vertical: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        child: _isLoading
-                                            ? const SizedBox(
-                                                height: 20,
-                                                width: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Column(
+                                          children: [
+                                            TextField(
+                                              controller: _emailController,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Email',
+                                                prefixIcon: Icon(Icons.email),
+                                              ),
+                                              keyboardType: TextInputType.emailAddress,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            TextField(
+                                              controller: _passwordController,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Password',
+                                                prefixIcon: Icon(Icons.lock),
+                                              ),
+                                              obscureText: true,
+                                            ),
+                                            if (_errorMessage != null) ...[
+                                              const SizedBox(height: 16),
+                                              Text(
+                                                _errorMessage!,
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.error,
                                                 ),
-                                              )
-                                            : const Text('Sign In'),
+                                              ),
+                                            ],
+                                            const SizedBox(height: 24),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                onPressed: _isLoading ? null : _signIn,
+                                                style: ElevatedButton.styleFrom(
+                                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                ),
+                                                child: _isLoading
+                                                    ? const SizedBox(
+                                                  height: 20,
+                                                  width: 20,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                                    : const Text('Sign In'),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
+
                             const SizedBox(height: 24),
                             IconButton(
                               icon: const Icon(Icons.brightness_6),
